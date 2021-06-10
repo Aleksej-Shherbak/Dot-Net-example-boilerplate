@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Data;
 using Domains;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Services.Security.Auth;
 using Services.Security.JwtToken;
@@ -76,8 +76,9 @@ namespace WebApplication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    //options.SaveToken = true;
+                    options.SaveToken = true;
                     options.TokenValidationParameters = jwtOptions.MapToTokenValidationParameters();
+                    options.Events = JwtEventsFactory.Create();
                 });
 
             services.AddAuthorization(options =>
@@ -87,11 +88,16 @@ namespace WebApplication
                     .Build();
             });
 
-            services.AddMvc().ConfigureApiBehaviorOptions(options =>
-            {
-                options.InvalidModelStateResponseFactory = ErrorResponseGenerator.ErrorResponse;
-            });
-
+            services.AddControllers().ConfigureApiBehaviorOptions(options =>
+                {
+                    options.InvalidModelStateResponseFactory = ErrorResponseGenerator.ErrorResponse;
+                })
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                    options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                });
+            
             services.AddScoped<JwtTokenService>();
             services.AddScoped<AuthService>();
         }
