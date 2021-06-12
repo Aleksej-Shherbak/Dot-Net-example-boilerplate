@@ -40,8 +40,7 @@ namespace WebApplication
             var databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDb");
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(databaseConnectionString, b
-                    => b.MigrationsAssembly("WebApplication"));
+                options.UseNpgsql(databaseConnectionString);
             });
 
             services.AddConnections();

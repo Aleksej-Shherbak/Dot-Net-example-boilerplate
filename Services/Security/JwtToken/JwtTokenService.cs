@@ -33,7 +33,7 @@ namespace Services.Security.JwtToken
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             };
 
             var roles = await _userManager.GetRolesAsync(user);

@@ -22,7 +22,7 @@ namespace Seeding
             
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("ConnectionStringBlogDb"));
+                options.UseNpgsql(configuration.GetConnectionString("ConnectionStringBlogDb"));
             });
             
             // Seeders go here 
