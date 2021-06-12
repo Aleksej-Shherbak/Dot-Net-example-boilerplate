@@ -19,9 +19,7 @@ namespace WebApplication.Infrastructure
 
                     // Write to the response in any way you wish here
                     context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    // You can add any headers
-                    //context.Response.Headers.Append("my-custom-header", "custom-value");
-                    
+                    context.Response.Headers.Append("Content-type", "application/json");
                     await context.Response.WriteAsync(JsonSerializer.Serialize(new BaseResponse
                     {
                         Message = "Unauthorized",

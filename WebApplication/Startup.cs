@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json;
 using Data;
 using Domains;
@@ -46,15 +47,27 @@ namespace WebApplication
             services.AddConnections();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "TodoApp", Version = "v1"});
-                c.AddSecurityDefinition("BearerAuth", new OpenApiSecurityScheme
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "Dotnet Blog", Version = "v1"});
+
+                var jwtSecurityScheme = new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,
                     Scheme = JwtBearerDefaults.AuthenticationScheme.ToLowerInvariant(),
                     In = ParameterLocation.Header,
                     Name = "Authorization",
                     BearerFormat = "JWT",
-                    Description = "JWT Authorization header using the Bearer scheme."
+                    Description = @"JWT Authorization header using the Bearer scheme. Enter your token here.",
+                    Reference = new OpenApiReference
+                    {
+                        Id = JwtBearerDefaults.AuthenticationScheme,
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtSecurityScheme);
+                
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { jwtSecurityScheme, Array.Empty<string>() }
                 });
 
                 // TODO понять, для чего это
