@@ -74,7 +74,8 @@ namespace WebApplication
             });
 
             var authPasswordOptions = passwordSection.Get<AuthPasswordOptions>();
-            services.AddIdentity<User, IdentityRole>(options =>
+            services
+                .AddIdentity<User, IdentityRole<int>>(options =>
             {
                 options.Password.RequireDigit = authPasswordOptions.RequireDigit;
                 options.Password.RequiredLength = authPasswordOptions.RequiredLength;
@@ -82,13 +83,13 @@ namespace WebApplication
                 options.Password.RequireUppercase = authPasswordOptions.RequireUppercase;
                 options.Password.RequireNonAlphanumeric = authPasswordOptions.RequireNonAlphanumeric;
                 options.User.RequireUniqueEmail = true;
-            }).AddEntityFrameworkStores<ApplicationDbContext>();
+            }).AddRoles<IdentityRole<int>>().AddEntityFrameworkStores<ApplicationDbContext>();
 
             var jwtOptions = authSection.Get<JwtAuthOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.SaveToken = true;
+                    //options.SaveToken = true;
                     options.TokenValidationParameters = jwtOptions.MapToTokenValidationParameters();
                     options.Events = JwtEventsFactory.Create();
                 });

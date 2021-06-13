@@ -21,13 +21,13 @@ namespace WebApplication
         {
             var adminRoleName = "admin";
             using var scope = host.Services.CreateScope();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<int>>>();
 
             var adminRole = roleManager.Roles.FirstOrDefault(x => x.Name == adminRoleName);
 
             if (adminRole == null)
             {
-                roleManager.CreateAsync(new IdentityRole(adminRoleName)).GetAwaiter().GetResult();
+                roleManager.CreateAsync(new IdentityRole<int>(adminRoleName)).GetAwaiter().GetResult();
             }
 
             var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();

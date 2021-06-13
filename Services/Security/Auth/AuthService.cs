@@ -46,12 +46,13 @@ namespace Services.Security.Auth
                 };
             }
 
-            var token = await _jwtTokenService.GenerateJwtAsync(user);
+            var token = await _jwtTokenService.GenerateTokensPair(user);
 
             return new LoginOutput
             {
                 IsSuccessful = true,
-                Token = token
+                AccessToken = token.AccessToken,
+                RefreshToken = token.RefreshToken,
             };
         }
         
@@ -74,12 +75,13 @@ namespace Services.Security.Auth
                 };
             }
 
-            var token = await _jwtTokenService.GenerateJwtAsync(user);
+            var token = await _jwtTokenService.GenerateTokensPair(user);
 
             return new RegisterOutput
             {
                 IsSuccessful = true,
-                Token = token
+                AccessToken = token.AccessToken,
+                RefreshToken = token.RefreshToken
             };
         }
     }

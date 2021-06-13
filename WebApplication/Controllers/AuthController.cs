@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Security.Auth;
 using ServicesModels.Security.Auth;
@@ -18,6 +19,7 @@ namespace WebApplication.Controllers
 
         [HttpPost]
         [Route("register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] Register model)
         {
             var registrationResult = await _authService.RegisterAsync(new RegisterInput
@@ -30,7 +32,7 @@ namespace WebApplication.Controllers
             return registrationResult.IsSuccessful
                 ? Ok(new
                 {
-                    registrationResult.Token
+                    Token = registrationResult.AccessToken
                 })
                 : BadRequest(new
                 {
@@ -41,6 +43,7 @@ namespace WebApplication.Controllers
 
         [HttpPost]
         [Route("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] Login model)
         {
             var loginResult = await _authService.LoginAsync(new LoginInput
@@ -52,7 +55,7 @@ namespace WebApplication.Controllers
             return loginResult.IsSuccessful
                 ? Ok(new
                 {
-                    loginResult.Token
+                    Token = loginResult.AccessToken
                 })
                 : BadRequest(new
                 {

@@ -6,12 +6,13 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0-preview.3.21201.13" />
+        <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.0-preview.4.21253.5" />
         <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.8.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.8.0" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Data\Data.csproj" />
       <ProjectReference Include="..\Domains\Domains.csproj" />
       <ProjectReference Include="..\ServicesModels\ServicesModels.csproj" />
     </ItemGroup>

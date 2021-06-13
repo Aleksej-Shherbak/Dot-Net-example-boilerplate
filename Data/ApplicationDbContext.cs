@@ -13,6 +13,7 @@ namespace Data
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         private const string AuthorIdFk = "AuthorId";
         private const string PostIdFk = "PostId";
@@ -24,7 +25,7 @@ namespace Data
             builder.Entity<Post>().Property<int>(AuthorIdFk);
             builder.Entity<Comment>().Property<int>(AuthorIdFk);
             builder.Entity<Comment>().Property<int>(PostIdFk);
-            
+
             builder.Entity<Post>()
                 .HasOne(x => x.Author)
                 .WithMany(x => x.Posts)
@@ -41,6 +42,12 @@ namespace Data
                 .HasMany(x => x.Comments)
                 .WithOne(x => x.Author)
                 .HasForeignKey(AuthorIdFk)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<User>()
+                .HasOne(x => x.RefreshToken)
+                .WithOne()
+                .HasForeignKey<RefreshToken>()
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

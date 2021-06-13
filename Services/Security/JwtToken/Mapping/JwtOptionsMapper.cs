@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Services.Security.JwtToken.Options;
 
@@ -28,6 +29,9 @@ namespace Services.Security.JwtToken.Mapping
                 TryAllIssuerSigningKeys = source.TokenParameters.TryAllIssuerSigningKeys,
                 ValidateActor = source.TokenParameters.ValidateActor,
                 ValidateTokenReplay = source.TokenParameters.ValidateTokenReplay,
+                
+                // Additional delay from the library we will set to zero. We dont need any hidden delays!
+                ClockSkew = TimeSpan.Zero
             };
         }
     }
