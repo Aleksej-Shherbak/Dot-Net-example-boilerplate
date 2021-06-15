@@ -1,8 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Security.Auth;
 using ServicesModels.Security.Auth;
+using ServicesModels.Security.JwtToken;
+using WebApplication.Models;
 using WebApplication.Models.Auth;
 
 namespace WebApplication.Controllers
@@ -29,22 +33,26 @@ namespace WebApplication.Controllers
                 UserName = model.UserName
             });
 
-            return registrationResult.IsSuccessful
-                ? Ok(new
+            if (registrationResult.IsSuccessful)
+            {
+                return Ok(new LoginResponse
                 {
-                    Token = registrationResult.AccessToken
-                })
-                : BadRequest(new
-                {
-                    registrationResult.Errors,
-                    ErrorCode = registrationResult.ErrorCode.ToString()
+                    AccessToken = registrationResult.AccessToken,
+                    RefreshToken = registrationResult.RefreshToken,
                 });
+            }
+
+            return BadRequest(new
+            {
+                registrationResult.Errors,
+                ErrorCode = registrationResult.ErrorCode.ToString()
+            });
         }
 
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] Login model)
+        public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
             var loginResult = await _authService.LoginAsync(new LoginInput
             {
@@ -52,16 +60,43 @@ namespace WebApplication.Controllers
                 Password = model.Password
             });
 
-            return loginResult.IsSuccessful
-                ? Ok(new
+            if (loginResult.IsSuccessful)
+            {
+                return Ok(new LoginResponse()
                 {
-                    Token = loginResult.AccessToken
-                })
-                : BadRequest(new
-                {
-                    Message = loginResult.Message,
-                    ErrorCode = loginResult.ErrorCode.ToString()
+                    AccessToken = loginResult.AccessToken,
+                    RefreshToken = loginResult.RefreshToken
                 });
+            }
+
+            return BadRequest(new
+            {
+                Message = loginResult.Message,
+                ErrorCode = loginResult.ErrorCode.ToString()
+            });
+        }
+
+        [HttpPost]
+        [Route("refresh")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Refresh([Required] string token)
+        {
+            var refreshResult = await _authService.Refresh(token);
+
+            if (refreshResult.IsSuccessfully)
+            {
+                return Ok(new LoginResponse
+                {
+                    AccessToken = refreshResult.AccessToken,
+                    RefreshToken = refreshResult.RefreshToken
+                });
+            }
+
+            return Unauthorized(new BaseResponse
+            {
+                Status = HttpStatusCode.Unauthorized,
+                Message = refreshResult.TokenInabilityReasons.ToString()
+            });
         }
     }
 }

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210613155207_init")]
+    [Migration("20210615171117_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,22 +87,15 @@ namespace Data.Migrations
             modelBuilder.Entity("Domains.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("AddedDate")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("JwtId")
-                        .HasColumnType("text");
 
                     b.Property<string>("Token")
                         .HasColumnType("text");
@@ -347,15 +340,10 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Domains.RefreshToken", b =>
                 {
-                    b.HasOne("Domains.User", null)
-                        .WithOne("RefreshToken")
-                        .HasForeignKey("Domains.RefreshToken", "Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Domains.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });
@@ -422,7 +410,7 @@ namespace Data.Migrations
 
                     b.Navigation("Posts");
 
-                    b.Navigation("RefreshToken");
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

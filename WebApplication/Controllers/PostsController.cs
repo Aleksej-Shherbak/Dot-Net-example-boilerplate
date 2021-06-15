@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using System.Threading.Tasks;
+using Data;
+using Domains;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,6 +11,13 @@ namespace WebApplication.Controllers
    // [Authorize(/*AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme*/)]
     public class PostsController : Controller
     {
+        private readonly ApplicationDbContext _dbContext;
+
+        public PostsController(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        
         [HttpGet]
         [Authorize]
         [Route("/posts")]

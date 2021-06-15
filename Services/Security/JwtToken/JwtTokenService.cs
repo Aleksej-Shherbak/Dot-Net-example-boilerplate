@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,32 +54,22 @@ namespace Services.Security.JwtToken
             var token = new JwtSecurityToken(
                 authParams.Issuer,
                 authParams.Audience, claims,
-                expires: DateTime.UtcNow.AddSeconds(authParams.TokenLiveTimeSeconds),
+                expires: DateTime.UtcNow.AddSeconds(authParams.AccessTokenLiveTimeSeconds),
                 signingCredentials: credentials);
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
 
-            var prevRefreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.User.Id == user.Id);
-
-            if (prevRefreshToken != null)
-            {
-                _dbContext.Remove(prevRefreshToken);
-            }
-
             var refreshToken = new RefreshToken()
             {
-                JwtId = token.Id,
-                IsUsed = false,
-                IsRevoked = false,
                 AddedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddMonths(6),
+                ExpiryDate = DateTime.UtcNow.AddSeconds(authParams.RefreshTokenLiveTimeSeconds),
                 Token = GenerateRandomString()
             };
 
             await _dbContext.RefreshTokens.AddAsync(refreshToken);
-            
-            user.RefreshToken = refreshToken;
-            
+
+            refreshToken.User = user;
+
             await _dbContext.SaveChangesAsync();
 
             return new GenerateTokensPairOutput()
@@ -87,7 +78,52 @@ namespace Services.Security.JwtToken
                 RefreshToken = refreshToken.Token
             };
         }
-        
+
+        public async Task<RefreshTokenOutput> RefreshToken(string refreshToken)
+        {
+            var refreshTokenDbRes = await _dbContext.RefreshTokens
+                .FirstOrDefaultAsync(x => x.Token.Equals(refreshToken));
+
+            if (refreshTokenDbRes == null)
+            {
+                return new RefreshTokenOutput
+                {
+                    TokenInabilityReasons = RefreshTokenInabilityReasons.NotFound
+                };
+            }
+
+            if (refreshTokenDbRes.ExpiryDate >= DateTime.UtcNow)
+            {
+                return new RefreshTokenOutput
+                {
+                    TokenInabilityReasons = RefreshTokenInabilityReasons.Expired
+                };
+            }
+
+            var user = await _dbContext.Users.FirstOrDefaultAsync(x => x.Id == refreshTokenDbRes.User.Id);
+
+            if (user == null)
+            {
+                return new RefreshTokenOutput
+                {
+                    TokenInabilityReasons = RefreshTokenInabilityReasons.UnknownReason
+                };
+            }
+
+            _dbContext.RefreshTokens.Remove(refreshTokenDbRes);
+            
+            await _dbContext.SaveChangesAsync();
+            
+            var tokenPair = await GenerateTokensPair(user);
+
+            return new RefreshTokenOutput
+            {
+                AccessToken = tokenPair.AccessToken,
+                RefreshToken = tokenPair.RefreshToken,
+                IsSuccessfully = true
+            };
+        }
+
         private SymmetricSecurityKey GetSymmetricSecurityKey(string secret)
         {
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret));

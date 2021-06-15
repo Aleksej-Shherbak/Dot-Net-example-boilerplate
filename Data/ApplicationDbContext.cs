@@ -44,10 +44,9 @@ namespace Data
                 .HasForeignKey(AuthorIdFk)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<User>()
-                .HasOne(x => x.RefreshToken)
-                .WithOne()
-                .HasForeignKey<RefreshToken>()
+            builder.Entity<RefreshToken>()
+                .HasOne(x => x.User)
+                .WithMany(x => x.RefreshTokens)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

@@ -2,7 +2,7 @@
 
 namespace WebApplication.Models.Auth
 {
-    public class Login
+    public class LoginRequest
     {
         [EmailAddress]
         [Required]

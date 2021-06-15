@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Services.Security.JwtToken;
 using ServicesModels.Security.Auth;
 using ServicesModels.Security.Auth.Enums;
+using ServicesModels.Security.JwtToken;
 
 namespace Services.Security.Auth
 {
@@ -83,6 +84,11 @@ namespace Services.Security.Auth
                 AccessToken = token.AccessToken,
                 RefreshToken = token.RefreshToken
             };
+        }
+
+        public Task<RefreshTokenOutput> Refresh(string token)
+        {
+            return _jwtTokenService.RefreshToken(token);
         }
     }
 }

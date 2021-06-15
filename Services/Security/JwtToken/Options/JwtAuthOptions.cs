@@ -17,7 +17,8 @@
         /// </summary>
         public string Secret { get; set; }
         
-        public int TokenLiveTimeSeconds { get; set; }
+        public int AccessTokenLiveTimeSeconds { get; set; }
+        public int RefreshTokenLiveTimeSeconds { get; set; }
 
         public TokenParameters TokenParameters { get; set; }
     }
