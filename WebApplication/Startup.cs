@@ -38,14 +38,12 @@ namespace WebApplication
             var passwordSection = _configuration.GetSection("PasswordOptions");
             services.Configure<AuthPasswordOptions>(passwordSection);
 
-            string databaseConnectionString;
-            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
+            var testConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDbTest");
+            var databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDb");
+
+            if (!string.IsNullOrWhiteSpace(testConnectionString))
             {
-                databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDbTest");
-            }
-            else
-            {
-                databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDb");
+                databaseConnectionString = testConnectionString;
             }
 
             services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(databaseConnectionString); });

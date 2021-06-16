@@ -1,7 +1,10 @@
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Seeding.Helpers;
 using WebApplication.Models.Auth;
 
 namespace Tests
@@ -19,19 +22,26 @@ namespace Tests
         public async Task UserCanGetTokensPair()
         {
             // Arrange
-            RefreshDb();
-            var request = new LoginRequest
+            await RefreshDbAsync();
+            UserHelper.CreateAdmin(_server.Services);
+            var loginModel = new LoginRequest
             {
                 Email = AdminEmail,
-                Password = AdminPassword,
+                Password = AdminPassword
             };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/login");
+                        
+            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
+           
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var response = await _client.PostAsync("/login", new StringContent(JsonSerializer.Serialize(request)));
-            response.EnsureSuccessStatusCode();
+            var response = await _client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseString);
-            
+            response.EnsureSuccessStatusCode();
+            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
+
             // Assert
             Assert.IsNotEmpty(loginResponse.AccessToken);
             Assert.IsNotEmpty(loginResponse.RefreshToken);
