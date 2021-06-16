@@ -38,11 +38,17 @@ namespace WebApplication
             var passwordSection = _configuration.GetSection("PasswordOptions");
             services.Configure<AuthPasswordOptions>(passwordSection);
 
-            var databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDb");
-            services.AddDbContext<ApplicationDbContext>(options =>
+            string databaseConnectionString;
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Testing")
             {
-                options.UseNpgsql(databaseConnectionString);
-            });
+                databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDbTest");
+            }
+            else
+            {
+                databaseConnectionString = _configuration.GetConnectionString("ConnectionStringBlogDb");
+            }
+
+            services.AddDbContext<ApplicationDbContext>(options => { options.UseNpgsql(databaseConnectionString); });
 
             services.AddConnections();
             services.AddSwaggerGen(c =>
@@ -64,10 +70,10 @@ namespace WebApplication
                     }
                 };
                 c.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, jwtSecurityScheme);
-                
+
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
-                    { jwtSecurityScheme, Array.Empty<string>() }
+                    {jwtSecurityScheme, Array.Empty<string>()}
                 });
 
                 // TODO понять, для чего это
@@ -77,14 +83,14 @@ namespace WebApplication
             var authPasswordOptions = passwordSection.Get<AuthPasswordOptions>();
             services
                 .AddIdentity<User, IdentityRole<int>>(options =>
-            {
-                options.Password.RequireDigit = authPasswordOptions.RequireDigit;
-                options.Password.RequiredLength = authPasswordOptions.RequiredLength;
-                options.Password.RequireLowercase = authPasswordOptions.RequireLowercase;
-                options.Password.RequireUppercase = authPasswordOptions.RequireUppercase;
-                options.Password.RequireNonAlphanumeric = authPasswordOptions.RequireNonAlphanumeric;
-                options.User.RequireUniqueEmail = true;
-            }).AddRoles<IdentityRole<int>>().AddEntityFrameworkStores<ApplicationDbContext>();
+                {
+                    options.Password.RequireDigit = authPasswordOptions.RequireDigit;
+                    options.Password.RequiredLength = authPasswordOptions.RequiredLength;
+                    options.Password.RequireLowercase = authPasswordOptions.RequireLowercase;
+                    options.Password.RequireUppercase = authPasswordOptions.RequireUppercase;
+                    options.Password.RequireNonAlphanumeric = authPasswordOptions.RequireNonAlphanumeric;
+                    options.User.RequireUniqueEmail = true;
+                }).AddRoles<IdentityRole<int>>().AddEntityFrameworkStores<ApplicationDbContext>();
 
             var jwtOptions = authSection.Get<JwtAuthOptions>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -110,7 +116,7 @@ namespace WebApplication
                     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                     options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 });
-            
+
             services.AddScoped<JwtTokenService>();
             services.AddScoped<AuthService>();
         }
