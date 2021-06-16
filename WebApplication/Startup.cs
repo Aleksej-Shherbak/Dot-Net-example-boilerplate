@@ -2,6 +2,7 @@ using System;
 using System.Text.Json;
 using Data;
 using Domains;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -89,7 +90,6 @@ namespace WebApplication
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    //options.SaveToken = true;
                     options.TokenValidationParameters = jwtOptions.MapToTokenValidationParameters();
                     options.Events = JwtEventsFactory.Create();
                 });

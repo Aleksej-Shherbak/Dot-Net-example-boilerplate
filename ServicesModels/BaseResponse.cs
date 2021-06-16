@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace WebApplication.Models
+namespace ServicesModels
 {
     public class BaseResponse
     {

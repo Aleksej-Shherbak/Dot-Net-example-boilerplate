@@ -1,6 +1,6 @@
 ﻿version: '3'
 services:
- 
+
   db:
     image: postgres:latest
     ports:
@@ -10,3 +10,13 @@ services:
       POSTGRES_USER: "sportshop"
       POSTGRES_PASSWORD: "sportshop"
       POSTGRES_DB: "sportshop"
+      
+  db_test:
+    image: postgres:latest
+    ports:
+      - "5433:5432"
+    restart: always
+    environment:
+      POSTGRES_USER: "sportshop_test"
+      POSTGRES_PASSWORD: "sportshop_test"
+      POSTGRES_DB: "sportshop_test"

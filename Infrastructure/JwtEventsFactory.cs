@@ -2,15 +2,15 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
-using WebApplication.Models;
+using ServicesModels;
 
-namespace WebApplication.Infrastructure
+namespace Infrastructure
 {
     public static class JwtEventsFactory
     {
         public static JwtBearerEvents Create()
         {
-            return new ()
+            return new()
             {
                 OnChallenge = async context =>
                 {
@@ -18,7 +18,7 @@ namespace WebApplication.Infrastructure
                     context.HandleResponse();
 
                     // Write to the response in any way you wish here
-                    context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
                     context.Response.Headers.Append("Content-type", "application/json");
                     await context.Response.WriteAsync(JsonSerializer.Serialize(new BaseResponse
                     {

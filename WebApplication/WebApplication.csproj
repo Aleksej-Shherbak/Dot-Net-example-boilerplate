@@ -13,6 +13,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Data\Data.csproj" />
+        <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+        <ProjectReference Include="..\Seeding\Seeding.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
     </ItemGroup>
 

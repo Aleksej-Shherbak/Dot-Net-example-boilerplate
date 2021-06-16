@@ -1,4 +1,4 @@
-﻿namespace WebApplication.Models
+﻿namespace ServicesModels
 {
     public class Response<T>: BaseResponse
     {

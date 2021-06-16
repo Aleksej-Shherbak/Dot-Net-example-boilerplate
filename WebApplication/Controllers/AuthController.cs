@@ -4,9 +4,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services.Security.Auth;
+using ServicesModels;
 using ServicesModels.Security.Auth;
-using ServicesModels.Security.JwtToken;
-using WebApplication.Models;
 using WebApplication.Models.Auth;
 
 namespace WebApplication.Controllers
