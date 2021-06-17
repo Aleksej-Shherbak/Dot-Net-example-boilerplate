@@ -1,6 +1,6 @@
 ﻿namespace WebApplication.Models.Http
 {
-    public class ErrorResponse
+    public class ErrorValidationResponse
     {
         public string ErrorField { get; set; }
         public string Description { get; set; }

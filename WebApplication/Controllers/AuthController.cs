@@ -7,6 +7,7 @@ using Services.Security.Auth;
 using ServicesModels;
 using ServicesModels.Security.Auth;
 using WebApplication.Models.Auth;
+using WebApplication.Models.Http;
 
 namespace WebApplication.Controllers
 {
@@ -41,7 +42,7 @@ namespace WebApplication.Controllers
                 });
             }
 
-            return BadRequest(new
+            return Unauthorized(new
             {
                 registrationResult.Errors,
                 ErrorCode = registrationResult.ErrorCode.ToString()
@@ -68,7 +69,7 @@ namespace WebApplication.Controllers
                 });
             }
 
-            return BadRequest(new
+            return Unauthorized(new  ErrorResponseBase
             {
                 Message = loginResult.Message,
                 ErrorCode = loginResult.ErrorCode.ToString()

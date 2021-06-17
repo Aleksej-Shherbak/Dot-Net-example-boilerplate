@@ -9,7 +9,7 @@ namespace WebApplication.Infrastructure
         public static BadRequestObjectResult ErrorResponse(ActionContext actionContext) {  
             return new BadRequestObjectResult(new { Errors = actionContext.ModelState  
                 .Where(modelError => modelError.Value.Errors.Count > 0)  
-                .Select(modelError => new ErrorResponse {  
+                .Select(modelError => new ErrorValidationResponse {  
                     ErrorField = System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(modelError.Key),  
                     Description = modelError.Value.Errors.FirstOrDefault()?.ErrorMessage  
                 }).ToList()});  
