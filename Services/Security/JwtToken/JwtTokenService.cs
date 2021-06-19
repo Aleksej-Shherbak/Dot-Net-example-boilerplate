@@ -30,7 +30,14 @@ namespace Services.Security.JwtToken
             _dbContext = dbContext;
         }
 
-        public async Task<GenerateTokensPairOutput> GenerateTokensPair(User user)
+        public Task<GenerateTokensPairOutput> GenerateTokensPairAsync(User user)
+        {
+            return GenerateTokensPairAsync(user, _jwtOptions.AccessTokenLiveTimeSeconds,
+                _jwtOptions.RefreshTokenLiveTimeSeconds);
+        }
+
+        public async Task<GenerateTokensPairOutput> GenerateTokensPairAsync(User user, int expirationAccessTokenSeconds,
+            int expirationRefreshTokenSeconds)
         {
             var authParams = _jwtOptions;
 
@@ -54,7 +61,7 @@ namespace Services.Security.JwtToken
             var token = new JwtSecurityToken(
                 authParams.Issuer,
                 authParams.Audience, claims,
-                expires: DateTime.UtcNow.AddSeconds(authParams.AccessTokenLiveTimeSeconds),
+                expires: DateTime.UtcNow.AddSeconds(expirationAccessTokenSeconds),
                 signingCredentials: credentials);
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(token);
@@ -62,7 +69,7 @@ namespace Services.Security.JwtToken
             var refreshToken = new RefreshToken()
             {
                 AddedDate = DateTime.UtcNow,
-                ExpiryDate = DateTime.UtcNow.AddSeconds(authParams.RefreshTokenLiveTimeSeconds),
+                ExpiryDate = DateTime.UtcNow.AddSeconds(expirationRefreshTokenSeconds),
                 Token = GenerateRandomString()
             };
 
@@ -81,7 +88,7 @@ namespace Services.Security.JwtToken
 
         public async Task<RefreshTokenOutput> RefreshToken(string refreshToken)
         {
-            var refreshTokenDbRes = await _dbContext.RefreshTokens
+            var refreshTokenDbRes = await _dbContext.RefreshTokens.Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Token.Equals(refreshToken));
 
             if (refreshTokenDbRes == null)
@@ -92,7 +99,7 @@ namespace Services.Security.JwtToken
                 };
             }
 
-            if (refreshTokenDbRes.ExpiryDate >= DateTime.UtcNow)
+            if (DateTime.UtcNow >= refreshTokenDbRes.ExpiryDate)
             {
                 return new RefreshTokenOutput
                 {
@@ -111,10 +118,10 @@ namespace Services.Security.JwtToken
             }
 
             _dbContext.RefreshTokens.Remove(refreshTokenDbRes);
-            
+
             await _dbContext.SaveChangesAsync();
-            
-            var tokenPair = await GenerateTokensPair(user);
+
+            var tokenPair = await GenerateTokensPairAsync(user);
 
             return new RefreshTokenOutput
             {

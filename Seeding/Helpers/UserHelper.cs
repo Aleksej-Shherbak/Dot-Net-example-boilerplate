@@ -8,7 +8,7 @@ namespace Seeding.Helpers
 {
     public static class UserHelper
     {
-        public static void CreateAdmin(IServiceProvider serviceProvider, string adminRoleName = "admin",
+        public static User CreateAdmin(IServiceProvider serviceProvider, string adminRoleName = "admin",
             string adminEmail = "admin@admin.com", string adminPassword = "password", string adminUserName = "admin")
         {
             using var scope = serviceProvider.CreateScope();
@@ -25,9 +25,10 @@ namespace Seeding.Helpers
 
             var adminsList = userMgr.GetUsersInRoleAsync(adminRoleName).GetAwaiter().GetResult();
 
+            User admin = null;
             if (adminsList.Any() == false)
             {
-                var admin = new User
+                admin = new User
                 {
                     EmailConfirmed = true,
                     UserName = adminUserName,
@@ -39,6 +40,7 @@ namespace Seeding.Helpers
 
                 Console.WriteLine("Super admin user has bean created!");
             }
+            return admin;
         }
     }
 }

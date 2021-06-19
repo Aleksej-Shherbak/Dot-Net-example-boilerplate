@@ -79,9 +79,9 @@ namespace WebApplication.Controllers
         [HttpPost]
         [Route("refresh")]
         [AllowAnonymous]
-        public async Task<IActionResult> Refresh([Required] string token)
+        public async Task<IActionResult> Refresh(RefreshRequest request)
         {
-            var refreshResult = await _authService.Refresh(token);
+            var refreshResult = await _authService.Refresh(request.Token);
 
             if (refreshResult.IsSuccessfully)
             {

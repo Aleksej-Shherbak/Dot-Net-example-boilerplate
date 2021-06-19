@@ -5,9 +5,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Seeding.Helpers;
+using Services.Security.JwtToken;
 using ServicesModels.Security.Auth.Enums;
+using ServicesModels.Security.JwtToken;
 using WebApplication.Models.Auth;
 using WebApplication.Models.Http;
 
@@ -80,10 +83,33 @@ namespace Tests
         }
 
         [Test]
-        [Description("User get Unauthorized if access token is expired")]
-        public async Task UserGetUnauthorizedIfAccessTokenExpired()
+        [Description("User cant refresh token if the refresh token is expired")]
+        public async Task UserCantRefreshWithExpiredRefresh()
         {
-            throw new NotImplementedException();
+            // Arrange
+            await RefreshDbAsync();
+            var user =  UserHelper.CreateAdmin(_server.Services);
+            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var tokensPair = await jwtService.GenerateTokensPairAsync(user, 0, 0);
+            
+            var model = new RefreshRequest()
+            {
+                Token = tokensPair.RefreshToken
+            };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/refresh");
+                        
+            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
+           
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Act
+            var httpResponseMessage = await _client.SendAsync(request);
+            var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
+            var response = JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
+
+            // Act
+            Assert.AreEqual(response.Message, RefreshTokenInabilityReasons.Expired.ToString());
         }
         
         [Test]

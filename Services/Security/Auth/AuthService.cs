@@ -47,7 +47,7 @@ namespace Services.Security.Auth
                 };
             }
 
-            var token = await _jwtTokenService.GenerateTokensPair(user);
+            var token = await _jwtTokenService.GenerateTokensPairAsync(user);
 
             return new LoginOutput
             {
@@ -76,7 +76,7 @@ namespace Services.Security.Auth
                 };
             }
 
-            var token = await _jwtTokenService.GenerateTokensPair(user);
+            var token = await _jwtTokenService.GenerateTokensPairAsync(user);
 
             return new RegisterOutput
             {
