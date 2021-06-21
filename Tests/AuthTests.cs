@@ -116,7 +116,31 @@ namespace Tests
         [Description("User can refresh token")]
         public async Task UserCanRefreshToken()
         {
-            throw new NotImplementedException();
+            // Arrange
+            await RefreshDbAsync();
+            var user =  UserHelper.CreateAdmin(_server.Services);
+            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var tokensPair = await jwtService.GenerateTokensPairAsync(user);
+            
+            var model = new RefreshRequest()
+            {
+                Token = tokensPair.RefreshToken
+            };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/refresh");
+                        
+            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
+           
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Act
+            var httpResponseMessage = await _client.SendAsync(request);
+            var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
+            var response = JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
+
+            // Act
+            Assert.AreNotEqual(tokensPair.RefreshToken, response.RefreshToken);
+            Assert.AreNotEqual(tokensPair.AccessToken, response.AccessToken);
         }
 
         [Test] [Description("User can user refresh token only once")]
