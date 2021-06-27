@@ -1,7 +1,10 @@
 ﻿using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Data;
 using Domains;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Services.Security.JwtToken;
 using ServicesModels.Security.Auth;
 using ServicesModels.Security.Auth.Enums;
@@ -14,13 +17,15 @@ namespace Services.Security.Auth
         private readonly SignInManager<User> _signInManager;
         private readonly UserManager<User> _userManager;
         private readonly JwtTokenService _jwtTokenService;
+        private readonly ApplicationDbContext _dbContext;
 
         public AuthService(SignInManager<User> signInManager, UserManager<User> userManager,
-            JwtTokenService jwtTokenService)
+            JwtTokenService jwtTokenService, ApplicationDbContext dbContext)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _jwtTokenService = jwtTokenService;
+            _dbContext = dbContext;
         }
 
         public async Task<LoginOutput> LoginAsync(LoginInput model)
@@ -89,6 +94,29 @@ namespace Services.Security.Auth
         public Task<RefreshTokenOutput> Refresh(string token)
         {
             return _jwtTokenService.RefreshToken(token);
+        }
+
+        public async Task LogoutAsync(ClaimsPrincipal userClaimsPrincipal)
+        {
+            if (userClaimsPrincipal == null)
+            {
+                return;
+            }
+
+            var user = await _userManager.GetUserAsync(userClaimsPrincipal);
+
+            if (user == null)
+            {
+                return;
+            }
+
+            var refreshTokens = await _dbContext.RefreshTokens.Where(x => x.User.Id == user.Id).ToArrayAsync();
+
+            _dbContext.RefreshTokens.RemoveRange(refreshTokens);
+
+            await _dbContext.SaveChangesAsync();
+            
+            // TODO add access token to Redis black list (as invalid) 
         }
     }
 }

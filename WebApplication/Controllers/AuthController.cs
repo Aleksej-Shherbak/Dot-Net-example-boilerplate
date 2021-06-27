@@ -12,6 +12,7 @@ using WebApplication.Models.Http;
 namespace WebApplication.Controllers
 {
     [ApiController]
+    [Authorize]
     public class AuthController : Controller
     {
         private readonly AuthService _authService;
@@ -97,6 +98,15 @@ namespace WebApplication.Controllers
                 Status = HttpStatusCode.Unauthorized,
                 Message = refreshResult.TokenInabilityReasons.ToString()
             });
+        }
+        
+        [HttpGet]
+        [Route("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await _authService.LogoutAsync(HttpContext.User);
+
+            return Ok();
         }
     }
 }

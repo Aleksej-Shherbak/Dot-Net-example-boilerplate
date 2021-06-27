@@ -98,6 +98,14 @@ namespace Services.Security.JwtToken
                     TokenInabilityReasons = RefreshTokenInabilityReasons.NotFound
                 };
             }
+            
+            if (refreshTokenDbRes.IsUsed)
+            {
+                return new RefreshTokenOutput
+                {
+                    TokenInabilityReasons = RefreshTokenInabilityReasons.Used
+                };
+            }
 
             if (DateTime.UtcNow >= refreshTokenDbRes.ExpiryDate)
             {
@@ -117,7 +125,7 @@ namespace Services.Security.JwtToken
                 };
             }
 
-            _dbContext.RefreshTokens.Remove(refreshTokenDbRes);
+            refreshTokenDbRes.IsUsed = true;
 
             await _dbContext.SaveChangesAsync();
 

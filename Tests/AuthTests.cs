@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Seeding.Helpers;
 using Services.Security.JwtToken;
+using ServicesModels;
 using ServicesModels.Security.Auth.Enums;
 using ServicesModels.Security.JwtToken;
 using WebApplication.Models.Auth;
@@ -37,9 +38,10 @@ namespace Tests
                 Password = AdminPassword
             };
             var request = new HttpRequestMessage(HttpMethod.Post, "/login");
-                        
-            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
-           
+
+            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -47,7 +49,8 @@ namespace Tests
             var response = await _client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
-            var loginResponse = JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
+            var loginResponse =
+                JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
 
             // Assert
             Assert.IsNotEmpty(loginResponse.AccessToken);
@@ -66,17 +69,19 @@ namespace Tests
                 Password = "kek"
             };
             var request = new HttpRequestMessage(HttpMethod.Post, "/login");
-                        
-            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
-           
+
+            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
             var response = await _client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
-            var loginResponse = JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
-            
+            var loginResponse =
+                JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
+
             // Assert
             Assert.AreEqual(response.StatusCode, HttpStatusCode.Unauthorized);
             Assert.AreEqual(loginResponse.ErrorCode, LoginErrorReasons.EmailNotFound.ToString());
@@ -88,48 +93,51 @@ namespace Tests
         {
             // Arrange
             await RefreshDbAsync();
-            var user =  UserHelper.CreateAdmin(_server.Services);
+            var user = UserHelper.CreateAdmin(_server.Services);
             var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
             var tokensPair = await jwtService.GenerateTokensPairAsync(user, 0, 0);
-            
+
             var model = new RefreshRequest()
             {
                 Token = tokensPair.RefreshToken
             };
             var request = new HttpRequestMessage(HttpMethod.Post, "/refresh");
-                        
-            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
-           
+
+            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
             var httpResponseMessage = await _client.SendAsync(request);
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
-            var response = JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
+            var response =
+                JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
 
-            // Act
+            // Assert
             Assert.AreEqual(response.Message, RefreshTokenInabilityReasons.Expired.ToString());
         }
-        
+
         [Test]
         [Description("User can refresh token")]
         public async Task UserCanRefreshToken()
         {
             // Arrange
             await RefreshDbAsync();
-            var user =  UserHelper.CreateAdmin(_server.Services);
+            var user = UserHelper.CreateAdmin(_server.Services);
             var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
             var tokensPair = await jwtService.GenerateTokensPairAsync(user);
-            
+
             var model = new RefreshRequest()
             {
                 Token = tokensPair.RefreshToken
             };
             var request = new HttpRequestMessage(HttpMethod.Post, "/refresh");
-                        
-            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption), Encoding.Default, "application/json");
-           
+
+            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
             _client.DefaultRequestHeaders.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -138,25 +146,98 @@ namespace Tests
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
             var response = JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
 
-            // Act
+            // Assert
             Assert.AreNotEqual(tokensPair.RefreshToken, response.RefreshToken);
-            Assert.AreNotEqual(tokensPair.AccessToken, response.AccessToken);
         }
 
-        [Test] [Description("User can user refresh token only once")]
+        [Test]
+        [Description("User can user refresh token only once")]
         public async Task UserCanRefreshTokenOnlyOnce()
         {
-            throw new NotImplementedException();
+            // Arrange
+            await RefreshDbAsync();
+            var user = UserHelper.CreateAdmin(_server.Services);
+            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var tokensPair = await jwtService.GenerateTokensPairAsync(user);
+
+            var model = new RefreshRequest()
+            {
+                Token = tokensPair.RefreshToken
+            };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/refresh");
+            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/refresh");
+
+            request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+            secondRequest.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Act
+            await _client.SendAsync(request);
+            var httpResponseMessage = await _client.SendAsync(secondRequest);
+            var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
+            var response = JsonSerializer.Deserialize<BaseResponse>(responseString, CamelCaseJsonSerializationOption);
+
+            // Assert
+            Assert.AreEqual(response.Message, RefreshTokenInabilityReasons.Used.ToString());
         }
-        
+
         [Test]
         [Description("Refresh tokens become invalid after logout")]
         public async Task RefreshTokensBecomeInvalidAfterLogout()
         {
-            // TODO after logout store access token in Redis (like a black list). Expiration should be equals access token live time 
-            throw new NotImplementedException();
+            // Arrange
+            await RefreshDbAsync();
+            UserHelper.CreateAdmin(_server.Services);
+            var loginModel = new LoginRequest
+            {
+                Email = AdminEmail,
+                Password = AdminPassword
+            };
+            var request = new HttpRequestMessage(HttpMethod.Post, "/login");
+
+            request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            var response = await _client.SendAsync(request);
+            var responseString = await response.Content.ReadAsStringAsync();
+            var loginResponse =
+                JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
+            var refreshToken = loginResponse.RefreshToken;
+            var accessToken = loginResponse.AccessToken;
+            var requestLogout = new HttpRequestMessage(HttpMethod.Get, "/logout");
+            _client.DefaultRequestHeaders.Clear();
+            requestLogout.Headers.Authorization =  new AuthenticationHeaderValue("Bearer", accessToken);
+            var logoutRes = await _client.SendAsync(requestLogout);
+            
+            // Act
+            var model = new RefreshRequest()
+            {
+                Token = refreshToken
+            };
+            var requestRefresh = new HttpRequestMessage(HttpMethod.Post, "/refresh");
+
+            requestRefresh.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
+                Encoding.Default, "application/json");
+
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Act
+            var httpResponseMessage = await _client.SendAsync(requestRefresh);
+            var responseStringRefresh = await httpResponseMessage.Content.ReadAsStringAsync();
+            var responseRefresh = JsonSerializer.Deserialize<BaseResponse>(responseStringRefresh, CamelCaseJsonSerializationOption);
+
+            // Assert
+            Assert.AreEqual(responseRefresh.Status, HttpStatusCode.Unauthorized);
         }
-        
+
         [Test]
         [Description("Access tokens become invalid after logout")]
         public async Task AccessTokensBecomeInvalidAfterLogout()
@@ -164,12 +245,52 @@ namespace Tests
             // TODO after logout store access token in Redis (like a black list). Expiration should be equals access token live time 
             throw new NotImplementedException();
         }
-        
+
         [Test]
         [Description("It's possible to use multiple refresh tokens")]
         public async Task PossibleToLoginFromSeveralPlacesSimultaneously()
         {
-            throw new NotImplementedException();
+            // Arrange
+            await RefreshDbAsync();
+            UserHelper.CreateAdmin(_server.Services);
+            var firstLoginModel = new LoginRequest
+            {
+                Email = AdminEmail,
+                Password = AdminPassword
+            };
+
+            var secondLoginModel = new LoginRequest
+            {
+                Email = AdminEmail,
+                Password = AdminPassword
+            };
+
+            var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/login");
+            firstRequest.Content =
+                new StringContent(JsonSerializer.Serialize(firstLoginModel, CamelCaseJsonSerializationOption),
+                    Encoding.Default, "application/json");
+
+            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/login");
+            secondRequest.Content =
+                new StringContent(JsonSerializer.Serialize(secondLoginModel, CamelCaseJsonSerializationOption),
+                    Encoding.Default, "application/json");
+
+            _client.DefaultRequestHeaders.Clear();
+            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            // Act
+            var firstResponse = await _client.SendAsync(firstRequest);
+            var firstResponseString = await firstResponse.Content.ReadAsStringAsync();
+            var firstLoginResponse =
+                JsonSerializer.Deserialize<LoginResponse>(firstResponseString, CamelCaseJsonSerializationOption);
+
+            var secondResponse = await _client.SendAsync(secondRequest);
+            var secondResponseString = await secondResponse.Content.ReadAsStringAsync();
+            var secondLoginResponse =
+                JsonSerializer.Deserialize<LoginResponse>(secondResponseString, CamelCaseJsonSerializationOption);
+
+            // Assert
+            Assert.AreNotEqual(firstLoginResponse.RefreshToken, secondLoginResponse.RefreshToken);
         }
     }
 }

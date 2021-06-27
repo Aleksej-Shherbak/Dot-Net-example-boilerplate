@@ -12,6 +12,7 @@
     {
         Expired,
         NotFound,
+        Used,
         UnknownReason
     }
 }
