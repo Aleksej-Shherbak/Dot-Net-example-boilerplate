@@ -31,7 +31,7 @@ namespace Tests
         {
             // Arrange
             await RefreshDbAsync();
-            UserHelper.CreateAdmin(_server.Services);
+            UserHelper.CreateAdmin(Server.Services);
             var loginModel = new LoginRequest
             {
                 Email = AdminEmail,
@@ -42,11 +42,11 @@ namespace Tests
             request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var response = await _client.SendAsync(request);
+            var response = await Client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
             response.EnsureSuccessStatusCode();
             var loginResponse =
@@ -58,7 +58,7 @@ namespace Tests
         }
 
         [Test]
-        [Description("User get 401 if invalid credentials given")]
+        [Description("User gets 401 if invalid credentials given")]
         public async Task UserCantLoginWithInvalidCredentials()
         {
             // Arrange
@@ -73,11 +73,11 @@ namespace Tests
             request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var response = await _client.SendAsync(request);
+            var response = await Client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
             var loginResponse =
                 JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
@@ -88,13 +88,13 @@ namespace Tests
         }
 
         [Test]
-        [Description("User cant refresh token if the refresh token is expired")]
+        [Description("User can't refresh token if the refresh token is expired")]
         public async Task UserCantRefreshWithExpiredRefresh()
         {
             // Arrange
             await RefreshDbAsync();
-            var user = UserHelper.CreateAdmin(_server.Services);
-            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var user = UserHelper.CreateAdmin(Server.Services);
+            var jwtService = Server.Services.GetRequiredService<JwtTokenService>();
             var tokensPair = await jwtService.GenerateTokensPairAsync(user, 0, 0);
 
             var model = new RefreshRequest()
@@ -106,11 +106,11 @@ namespace Tests
             request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var httpResponseMessage = await _client.SendAsync(request);
+            var httpResponseMessage = await Client.SendAsync(request);
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
             var response =
                 JsonSerializer.Deserialize<ErrorResponseBase>(responseString, CamelCaseJsonSerializationOption);
@@ -125,8 +125,8 @@ namespace Tests
         {
             // Arrange
             await RefreshDbAsync();
-            var user = UserHelper.CreateAdmin(_server.Services);
-            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var user = UserHelper.CreateAdmin(Server.Services);
+            var jwtService = Server.Services.GetRequiredService<JwtTokenService>();
             var tokensPair = await jwtService.GenerateTokensPairAsync(user);
 
             var model = new RefreshRequest()
@@ -138,11 +138,11 @@ namespace Tests
             request.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var httpResponseMessage = await _client.SendAsync(request);
+            var httpResponseMessage = await Client.SendAsync(request);
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
             var response = JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
 
@@ -151,13 +151,13 @@ namespace Tests
         }
 
         [Test]
-        [Description("User can user refresh token only once")]
+        [Description("User can refresh token only once")]
         public async Task UserCanRefreshTokenOnlyOnce()
         {
             // Arrange
             await RefreshDbAsync();
-            var user = UserHelper.CreateAdmin(_server.Services);
-            var jwtService = _server.Services.GetRequiredService<JwtTokenService>();
+            var user = UserHelper.CreateAdmin(Server.Services);
+            var jwtService = Server.Services.GetRequiredService<JwtTokenService>();
             var tokensPair = await jwtService.GenerateTokensPairAsync(user);
 
             var model = new RefreshRequest()
@@ -172,12 +172,12 @@ namespace Tests
             secondRequest.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            await _client.SendAsync(request);
-            var httpResponseMessage = await _client.SendAsync(secondRequest);
+            await Client.SendAsync(request);
+            var httpResponseMessage = await Client.SendAsync(secondRequest);
             var responseString = await httpResponseMessage.Content.ReadAsStringAsync();
             var response = JsonSerializer.Deserialize<BaseResponse>(responseString, CamelCaseJsonSerializationOption);
 
@@ -191,7 +191,7 @@ namespace Tests
         {
             // Arrange
             await RefreshDbAsync();
-            UserHelper.CreateAdmin(_server.Services);
+            UserHelper.CreateAdmin(Server.Services);
             var loginModel = new LoginRequest
             {
                 Email = AdminEmail,
@@ -202,19 +202,19 @@ namespace Tests
             request.Content = new StringContent(JsonSerializer.Serialize(loginModel, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            var response = await _client.SendAsync(request);
+            var response = await Client.SendAsync(request);
             var responseString = await response.Content.ReadAsStringAsync();
             var loginResponse =
                 JsonSerializer.Deserialize<LoginResponse>(responseString, CamelCaseJsonSerializationOption);
             var refreshToken = loginResponse.RefreshToken;
             var accessToken = loginResponse.AccessToken;
             var requestLogout = new HttpRequestMessage(HttpMethod.Get, "/logout");
-            _client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Clear();
             requestLogout.Headers.Authorization =  new AuthenticationHeaderValue("Bearer", accessToken);
-            var logoutRes = await _client.SendAsync(requestLogout);
+            var logoutRes = await Client.SendAsync(requestLogout);
             
             // Act
             var model = new RefreshRequest()
@@ -226,11 +226,11 @@ namespace Tests
             requestRefresh.Content = new StringContent(JsonSerializer.Serialize(model, CamelCaseJsonSerializationOption),
                 Encoding.Default, "application/json");
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var httpResponseMessage = await _client.SendAsync(requestRefresh);
+            var httpResponseMessage = await Client.SendAsync(requestRefresh);
             var responseStringRefresh = await httpResponseMessage.Content.ReadAsStringAsync();
             var responseRefresh = JsonSerializer.Deserialize<BaseResponse>(responseStringRefresh, CamelCaseJsonSerializationOption);
 
@@ -252,7 +252,7 @@ namespace Tests
         {
             // Arrange
             await RefreshDbAsync();
-            UserHelper.CreateAdmin(_server.Services);
+            UserHelper.CreateAdmin(Server.Services);
             var firstLoginModel = new LoginRequest
             {
                 Email = AdminEmail,
@@ -265,26 +265,29 @@ namespace Tests
                 Password = AdminPassword
             };
 
-            var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/login");
-            firstRequest.Content =
-                new StringContent(JsonSerializer.Serialize(firstLoginModel, CamelCaseJsonSerializationOption),
-                    Encoding.Default, "application/json");
+            var firstRequest = new HttpRequestMessage(HttpMethod.Post, "/login")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(firstLoginModel, CamelCaseJsonSerializationOption),
+                    Encoding.Default, "application/json")
+            };
 
-            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/login");
-            secondRequest.Content =
-                new StringContent(JsonSerializer.Serialize(secondLoginModel, CamelCaseJsonSerializationOption),
-                    Encoding.Default, "application/json");
+            var secondRequest = new HttpRequestMessage(HttpMethod.Post, "/login")
+            {
+                Content = new StringContent(
+                    JsonSerializer.Serialize(secondLoginModel, CamelCaseJsonSerializationOption),
+                    Encoding.Default, "application/json")
+            };
 
-            _client.DefaultRequestHeaders.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Act
-            var firstResponse = await _client.SendAsync(firstRequest);
+            var firstResponse = await Client.SendAsync(firstRequest);
             var firstResponseString = await firstResponse.Content.ReadAsStringAsync();
             var firstLoginResponse =
                 JsonSerializer.Deserialize<LoginResponse>(firstResponseString, CamelCaseJsonSerializationOption);
 
-            var secondResponse = await _client.SendAsync(secondRequest);
+            var secondResponse = await Client.SendAsync(secondRequest);
             var secondResponseString = await secondResponse.Content.ReadAsStringAsync();
             var secondLoginResponse =
                 JsonSerializer.Deserialize<LoginResponse>(secondResponseString, CamelCaseJsonSerializationOption);

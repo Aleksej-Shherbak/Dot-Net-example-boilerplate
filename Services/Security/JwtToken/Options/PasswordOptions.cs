@@ -1,6 +1,6 @@
 ﻿namespace Services.Security.JwtToken.Options
 {
-    public class AuthPasswordOptions
+    public class PasswordOptions
     {
         public bool RequireDigit { get; set; }
         public int RequiredLength { get; set; }

@@ -5,6 +5,7 @@ using Data;
 using Domains;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Services.Security.JwtToken;
 using ServicesModels.Security.Auth;
 using ServicesModels.Security.Auth.Enums;
@@ -18,6 +19,7 @@ namespace Services.Security.Auth
         private readonly UserManager<User> _userManager;
         private readonly JwtTokenService _jwtTokenService;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IDistributedCache _cache;
 
         public AuthService(SignInManager<User> signInManager, UserManager<User> userManager,
             JwtTokenService jwtTokenService, ApplicationDbContext dbContext)
@@ -117,6 +119,7 @@ namespace Services.Security.Auth
             await _dbContext.SaveChangesAsync();
             
             // TODO add access token to Redis black list (as invalid) 
+
         }
     }
 }

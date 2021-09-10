@@ -39,9 +39,7 @@ namespace Services.Security.JwtToken
         public async Task<GenerateTokensPairOutput> GenerateTokensPairAsync(User user, int expirationAccessTokenSeconds,
             int expirationRefreshTokenSeconds)
         {
-            var authParams = _jwtOptions;
-
-            var secretKey = GetSymmetricSecurityKey(authParams.Secret);
+            var secretKey = GetSymmetricSecurityKey(_jwtOptions.Secret);
 
             var credentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
@@ -59,8 +57,8 @@ namespace Services.Security.JwtToken
             }
 
             var token = new JwtSecurityToken(
-                authParams.Issuer,
-                authParams.Audience, claims,
+                _jwtOptions.Issuer,
+                _jwtOptions.Audience, claims,
                 expires: DateTime.UtcNow.AddSeconds(expirationAccessTokenSeconds),
                 signingCredentials: credentials);
 
