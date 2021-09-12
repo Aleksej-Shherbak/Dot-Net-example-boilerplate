@@ -1,4 +1,4 @@
-﻿namespace Services.Security.JwtToken.Options
+﻿namespace Infrastructure.Options
 {
     public class TokenParameters
     {

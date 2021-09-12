@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Data;
 using Domains;
+using Infrastructure.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

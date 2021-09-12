@@ -1,22 +1,18 @@
 ﻿using Data;
 using Domains;
-using Infrastructure;
+using Infrastructure.Mapping;
+using Infrastructure.Options;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Services.Security.Auth;
-using Services.Security.JwtToken;
-using Services.Security.JwtToken.Mapping;
-using Services.Security.JwtToken.Options;
-using PasswordOptions = Services.Security.JwtToken.Options.PasswordOptions;
 
-namespace WebApplication.Infrastructure.Extensions.Configuration
+namespace Infrastructure.Ext
 {
-    public static class SecurityExt
+    public static class IdentityExt
     {
-        public static IServiceCollection AddSecurityExt(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddProjectIdentity(this IServiceCollection services, IConfiguration configuration)
         {
             var authPasswordOptions = configuration.GetSection(nameof(PasswordOptions)).Get<PasswordOptions>();
             services
@@ -35,7 +31,7 @@ namespace WebApplication.Infrastructure.Extensions.Configuration
                 .AddJwtBearer(options =>
                 {
                     options.TokenValidationParameters = jwtOptions.MapToTokenValidationParameters();
-                    options.Events = JwtEventsFactory.Create();
+                   // options.Events = JwtEventsFactory.Create();
                 });
 
             services.AddAuthorization(options =>
@@ -44,9 +40,7 @@ namespace WebApplication.Infrastructure.Extensions.Configuration
                     .RequireAuthenticatedUser()
                     .Build();
             });
-
-            services.AddScoped<JwtTokenService>();
-            services.AddScoped<AuthService>();
+            
             
             return services;
         }

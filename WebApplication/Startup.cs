@@ -1,7 +1,10 @@
+using Infrastructure.Ext;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Services.Security.Auth;
+using Services.Security.JwtToken;
 using WebApplication.Infrastructure.Extensions.Configuration;
 
 namespace WebApplication
@@ -20,7 +23,9 @@ namespace WebApplication
             services.AddOptions(_configuration);
             services.AddSwagger();
             services.AddStorages(_configuration);
-            services.AddSecurityExt(_configuration);
+            services.AddProjectIdentity(_configuration);
+            services.AddScoped<JwtTokenService>();
+            services.AddScoped<AuthService>();
             services.AddWeb(_configuration);
         }
 

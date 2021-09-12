@@ -5,11 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.6" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0-preview.4.21253.1" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ServicesModels\ServicesModels.csproj" />
+        <ProjectReference Include="..\Data\Data.csproj" />
+        <ProjectReference Include="..\Domains\Domains.csproj" />
+        <ProjectReference Include="..\ServicesModels\ServicesModels.csproj" />
     </ItemGroup>
 
 </Project>

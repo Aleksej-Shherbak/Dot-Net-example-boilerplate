@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Text;
+using Infrastructure.Options;
 using Microsoft.IdentityModel.Tokens;
-using Services.Security.JwtToken.Options;
 
-namespace Services.Security.JwtToken.Mapping
+namespace Infrastructure.Mapping
 {
     public static class JwtOptionsMapper
     {
