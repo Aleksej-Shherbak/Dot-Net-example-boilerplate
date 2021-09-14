@@ -4,7 +4,7 @@ using Domains;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Seeding.Helpers
+namespace Tests.Utils
 {
     public static class UserHelper
     {

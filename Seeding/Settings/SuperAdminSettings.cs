@@ -1,6 +1,6 @@
 ﻿namespace Seeding.Settings
 {
-    public class SuperAdmin
+    public class SuperAdminSettings
     {
         public string Email { get; set; }
         public string Password { get; set; }

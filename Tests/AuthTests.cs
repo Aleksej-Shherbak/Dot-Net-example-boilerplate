@@ -7,11 +7,11 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using Seeding.Helpers;
 using Services.Security.JwtToken;
 using ServicesModels;
 using ServicesModels.Security.Auth.Enums;
 using ServicesModels.Security.JwtToken;
+using Tests.Utils;
 using WebApplication.Models.Auth;
 using WebApplication.Models.Http;
 

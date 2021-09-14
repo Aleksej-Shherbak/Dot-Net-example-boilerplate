@@ -1,21 +1,22 @@
-﻿using System.Threading.Tasks;
-using Data;
+﻿using System;
+using System.Threading.Tasks;
 using Domains;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Seeding.Seeding.Abstract;
 using Seeding.Settings;
 
 namespace Seeding.Seeding
 {
-    public class SuperAdminSeeder: ISeeder
+    public class SuperAdminSeeder: SeederBase
     {
-        
-        public async Task<bool> SeedAsync(ServiceProvider serviceProvider, IConfiguration configuration)
+        public override string SeederName => nameof(SuperAdminSeeder);
+
+        public override async Task<bool> SeedAsync(IServiceProvider serviceProvider, IConfiguration configuration)
         {
-            var superAdminOptions = serviceProvider.GetService<IOptions<SuperAdmin>>().Value;
+            var superAdminOptions = serviceProvider.GetService<IOptions<SuperAdminSettings>>().Value;
             var userManager = serviceProvider.GetService<UserManager<User>>();
 
             var user = new User
@@ -31,11 +32,9 @@ namespace Seeding.Seeding
                 await userManager.AddToRoleAsync(currentUser, superAdminOptions.Role);
                 return true;
             }
-            else
-            {
-                return false;
-            }
-            
+
+            return false;
+
         }
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Seeding.Seeding;
 using Seeding.Settings;
 using Infrastructure.Ext;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 
 
 namespace Seeding
@@ -24,20 +26,17 @@ namespace Seeding
             
             var services = new ServiceCollection();
             
-            services.Configure<SuperAdmin>(configuration.GetSection(nameof(SuperAdmin)));
+            services.Configure<SuperAdminSettings>(configuration.GetSection(nameof(SuperAdminSettings)));
+            services.AddLogging();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseNpgsql(configuration.GetConnectionString("ConnectionStringBlogDb"));
             });
             services.AddProjectIdentity(configuration);
+            services.AddScoped<SeedersRunner>();
+            services.AddSingleton(configuration);
             
-            // Seeders go here 
-            var seedingTasks = new List<ISeeder>
-            {
-                new SuperAdminSeeder(),
-            }.Select(x => x.SeedAsync(services.BuildServiceProvider(), configuration));
-
-            await Task.WhenAll(seedingTasks);
+            await services.BuildServiceProvider().GetService<SeedersRunner>().RunAsync();
         }
     }
 }
